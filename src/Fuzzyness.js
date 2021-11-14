@@ -1,13 +1,16 @@
 class Fuzzyness{
 
-    constructor(pField, pValue, pLength = 3, pCount = 1) {
+    constructor(pField, pValue, pCount = 2) {
         this.field = pField;
-        this.length = pLength;
         this.count = pCount;
+
+        if(pValue.length === 0 || pValue.length<=pCount){
+            return;
+        }
 
         this.values = [pValue, pValue+'%', '%'+pValue, '%'+pValue+'%'];
 
-        for(let i = 1, max = this.length+1; i<max; i++){
+        for(let i = 1, max = this.count+1; i<max; i++){
             this._fuzz(i);
         }
     }
@@ -23,8 +26,8 @@ class Fuzzyness{
                 let newVal = [].concat(val);
                 newVal.splice(i-pCount, pCount, '%');
                 let fuzz = newVal.join('');
-                fuzz = fuzz.replace('%%', '%');
-                if(ref.values.indexOf(fuzz)>-1){
+                fuzz = fuzz.replace(/([%]+)/g, '%');
+                if(ref.values.indexOf(fuzz)>-1 || fuzz === '%'){
                     continue;
                 }
                 ref.values.push(fuzz);
@@ -33,6 +36,9 @@ class Fuzzyness{
     }
 
     get(){
+        if(this.values.length===0){
+            return '';
+        }
         let ref = this;
         let or = this.values.reduce(function(pReturn, pVal){
             let like = ref.field+' LIKE "'+pVal+'"';

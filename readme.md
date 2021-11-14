@@ -12,21 +12,20 @@ Usage
 
 ```js
 let rawValue = 'with eror';
-let cond = new Fuzzyness('field_name', rawValue, 2, 1);
+let cond = new Fuzzyness('field_name', rawValue, 2);
 console.log('SELECT * FROM table '+cond.get());
 ```
 
 API Doc
 --
 ```js
-Fuzzyness(pField, pValue, pLength = 3, pCount = 1)
+Fuzzyness(pField, pValue, pCount = 2)
 ```
 
 |Name   |Type  |Description                           |
 |-------|------|--------------------------------------|
 |`pField`|String|Field name                            |
 |`pValue`|String|Value to mess with                    |
-|`plength`|Number|Number of incorrect chars side by side|
 |`pCount`|Number|Number of incorrect chars             |
 
 Todo
