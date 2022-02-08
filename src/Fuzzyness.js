@@ -3,6 +3,7 @@ class Fuzzyness{
     constructor(pField, pValue, pCount = 2) {
         this.field = pField;
         this.count = pCount;
+        this.prettyPrint = false;
 
         if(pValue.length === 0 || pValue.length<=pCount){
             return;
@@ -18,16 +19,16 @@ class Fuzzyness{
     _fuzz(pCount){
         let ref  = this;
         this.values.forEach(function(pVal){
-            if((pVal.match(/%/g)||[]).length>=ref.count){
+            if((pVal.match(/_/g)||[]).length>=ref.count){
                 return;
             }
             let val = pVal.split('');
             for(let i = val.length; i>0; i--){
                 let newVal = [].concat(val);
-                newVal.splice(i-pCount, pCount, '%');
+                newVal.splice(i-pCount, pCount, '_');
                 let fuzz = newVal.join('');
-                fuzz = fuzz.replace(/([%]+)/g, '%');
-                if(ref.values.indexOf(fuzz)>-1 || fuzz === '%'){
+                fuzz = fuzz.replace(/([_]+)/g, '_');
+                if(ref.values.indexOf(fuzz)>-1 || fuzz === '_'){
                     continue;
                 }
                 ref.values.push(fuzz);
@@ -39,19 +40,21 @@ class Fuzzyness{
         if(this.values.length===0){
             return '';
         }
+        let sep = this.prettyPrint?"\r\n":"";
+        let sep_entry = this.prettyPrint?"\r\n\t":"";
         let ref = this;
         let or = this.values.reduce(function(pReturn, pVal){
             let like = ref.field+' LIKE "'+pVal+'"';
             if(pReturn !== '('){
                 like = ' OR '+like;
             }
-            return pReturn+like;
+            return pReturn+sep_entry+like;
         }, '(')+')';
         let index = 0;
         let order = this.values.reduce(function(pReturn, pVal){
-            return pReturn+'WHEN '+ref.field+' LIKE "'+pVal+'" THEN '+(index++)+' ';
-        }, 'CASE ')+'END ASC';
-        return "WHERE "+or+" ORDER BY "+order+";";
+            return pReturn+sep_entry+'WHEN '+ref.field+' LIKE "'+pVal+'" THEN '+(index++)+' ';
+        }, 'CASE ')+sep+'END ASC';
+        return "WHERE "+or+sep+" ORDER BY "+order+";";
     }
 
 }
